@@ -6,6 +6,11 @@
 panel_width = 6.5*25.4;    // How wide the panel is
 panel_height = 0.5*25.4;    // How tall the panel is
 panel_thickness = 1.6; // The thickness of the material (e.g., 1.6mm for 16 gauge)
+corner_radius = 3;     // Radius for the rounded corners of the panel
+
+// --- Output Mode ---
+// Set to true to generate a 2D projection for DXF export.
+output_2D = true;
 
 
 // --- Switch Cutout Parameters ---
@@ -37,16 +42,31 @@ module d_hole() {
 // --- Geometry Generation ---
 // This code uses the parameters and modules above to build the final part.
 
-difference() {
-    
-    // 1. Create the main rectangular panel body.
-    cube([panel_width, panel_height, panel_thickness], center = true);
-    
-    // 2. Create two D-shaped holes, 40mm apart, and subtract them.
-    translate([-40, 0, 0]) {
-        d_hole();
+module panel() {
+    difference() {
+        
+        // 1. Create the main rectangular panel body with rounded corners.
+        linear_extrude(height = panel_thickness, center = true) {
+            minkowski() {
+                square([panel_width - corner_radius * 2, panel_height - corner_radius * 2], center = true);
+                circle(r = corner_radius, $fn=100);
+            }
+        }
+        
+        // 2. Create two D-shaped holes, 40mm apart, and subtract them.
+        translate([-40, 0, 0]) {
+            d_hole();
+        }
+        translate([40, 0, 0]) {
+            d_hole();
+        }
     }
-    translate([40, 0, 0]) {
-        d_hole();
+}
+
+if (output_2D) {
+    projection(cut = true) {
+        panel();
     }
+} else {
+    panel();
 }
