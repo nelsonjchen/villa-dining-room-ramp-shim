@@ -4,8 +4,8 @@ front_height_mm = 10.3;    // The short side (toe) of the ramp part
 block_width_mm = 50.0;     // How deep the object is (Z axis)
 cutout_radius_mm = back_height_mm / 2;    // RADIUS of the cylinder chunk to remove
 
-// --- NEW VARIABLE: EXTRA BASE ---
-extra_base_height_mm = 22.75; // Height of the extra material underneath
+// --- EXTRA BASE ---
+extra_base_height_mm = 30; // Height of the extra material underneath
 
 // --- ANGLE CALCULATION ---
 target_angle = asin(5.75 / 23);
@@ -13,6 +13,11 @@ target_angle = asin(5.75 / 23);
 // --- GEOMETRY MATH ---
 rise = back_height_mm - front_height_mm;
 calculated_length = rise / tan(target_angle);
+
+// extra length
+
+// Fit futher back a bit underneath the cylinder cutout
+extra_calculated_length = calculated_length ;
 
 // --- RENDER ---
 // OpenSCAD automatically combines (unions) shapes listed sequentially.
@@ -38,9 +43,9 @@ difference() {
 
 // 2. THE EXTRA BASE MATERIAL
 // This part is shifted down to sit below Y=0
-translate([0, -extra_base_height_mm, 0]) {
+translate([0 + cutout_radius_mm - 22.75 , -extra_base_height_mm, 0]) {
     // Creates a block: [length (X), height (Y), depth (Z)]
-    cube([calculated_length, extra_base_height_mm, block_width_mm]);
+    cube([extra_calculated_length + 22.75 - cutout_radius_mm, extra_base_height_mm, block_width_mm]);
 }
 
 
