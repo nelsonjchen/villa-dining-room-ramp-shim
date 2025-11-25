@@ -1,72 +1,34 @@
-// Parametric Rectangular Panel with D-Shaped Switch Cutouts
+// --- DIMENSIONS (mm) ---
+back_height_mm = 26.57;    // The tall side (Your requested height)
+front_height_mm = 10;     // The short side (The "toe"). Must be > 0 to be 4-sided.
+block_width_mm = 50.0;     // How deep the object is
 
-// --- Main Panel Parameters ---
-// Change these values to resize your panel. All units are in mm.
+// --- ANGLE CALCULATION ---
+// Keeping the specific angle from your original 23" x 5.75" ramp
+// sin(theta) = 5.75 / 23
+target_angle = asin(5.75 / 23);
 
-panel_width = 6.5*25.4;    // How wide the panel is
-panel_height = 0.5*25.4;    // How tall the panel is
-panel_thickness = 1.6; // The thickness of the material (e.g., 1.6mm for 16 gauge)
-corner_radius = 3;     // Radius for the rounded corners of the panel
+// --- GEOMETRY MATH ---
+// We calculate the length automatically to ensure the angle stays perfect.
+// tan(theta) = (Back - Front) / Length
+// Therefore: Length = (Back - Front) / tan(theta)
+rise = back_height_mm - front_height_mm;
+calculated_length = rise / tan(target_angle);
 
-// --- Output Mode ---
-// Set to true to generate a 2D projection for DXF export.
-output_2D = true;
-
-
-// --- Switch Cutout Parameters ---
-// These are from the datasheet and should not be changed.
-switch_diameter = 10;
-switch_flat_distance = 9.7;
-
-
-// --- Reusable Modules ---
-
-// Module to create a single D-shaped ("flat tire") hole.
-module d_hole() {
-    // The hole is made by taking a cylinder and cutting off one side.
-    difference() {
-        // Start with a round hole.
-        // It's made taller than the panel to ensure a clean cut.
-        cylinder(h = panel_thickness * 2, d = switch_diameter, center = true, $fn = 100);
-        
-        // Cut off the top to make a flat side.
-        // A cube is positioned to remove the top part of the cylinder.
-        // The flat position is derived from the datasheet parameters.
-        translate([0, switch_flat_distance, 0]) {
-            cube([switch_diameter, switch_diameter, panel_thickness * 2], center = true);
-        }
-    }
+// --- RENDER ---
+linear_extrude(height = block_width_mm) {
+    polygon(points = [
+        [0, 0],                         // Bottom Left (Back)
+        [calculated_length, 0],         // Bottom Right (Front)
+        [calculated_length, front_height_mm], // Top Right (Front Face)
+        [0, back_height_mm]             // Top Left (Back Face)
+    ]);
 }
 
-
-// --- Geometry Generation ---
-// This code uses the parameters and modules above to build the final part.
-
-module panel() {
-    difference() {
-        
-        // 1. Create the main rectangular panel body with rounded corners.
-        linear_extrude(height = panel_thickness, center = true) {
-            minkowski() {
-                square([panel_width - corner_radius * 2, panel_height - corner_radius * 2], center = true);
-                circle(r = corner_radius, $fn=100);
-            }
-        }
-        
-        // 2. Create two D-shaped holes, 40mm apart, and subtract them.
-        translate([-40, 0, 0]) {
-            d_hole();
-        }
-        translate([40, 0, 0]) {
-            d_hole();
-        }
-    }
-}
-
-if (output_2D) {
-    projection(cut = true) {
-        panel();
-    }
-} else {
-    panel();
-}
+// --- DATA OUTPUT ---
+echo("------------------------------------------------");
+echo(str("Slope Angle: ", target_angle, " degrees"));
+echo(str("Back Height: ", back_height_mm, " mm"));
+echo(str("Front Height: ", front_height_mm, " mm"));
+echo(str("Resulting Length: ", calculated_length, " mm"));
+echo("------------------------------------------------");
