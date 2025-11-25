@@ -7,6 +7,7 @@ This project contains a parametric OpenSCAD script for generating a 3D-printable
 -   **Parametric Design:** Easily adjustable dimensions via variables at the top of the `.scad` file.
 -   **Configurable Profiles:** Includes a toggle (`is_dining_room`) to switch between preset heights for different rooms.
 -   **Hollow Structure:** Generates a hollow shell with a specified wall thickness to save material while maintaining structural integrity.
+-   **Circular Cutout:** A cylindrical cutout at the back of the ramp, calculated based on the back height, designed to ensure a perfect fit against curved surfaces or molding.
 -   **Overhang Lip:** Optional rectangular extension to help the ramp sit flush or hook onto surfaces.
 -   **Floor Cut:** Automatically slices the bottom to ensure a flat base.
 
