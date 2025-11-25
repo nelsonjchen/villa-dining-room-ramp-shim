@@ -1,56 +1,69 @@
-// --- DIMENSIONS (mm) ---
-back_height_mm = 26.57;    // The tall side of the ramp part
-front_height_mm = 10.3;    // The short side (toe) of the ramp part
-block_width_mm = 50.0;     // How deep the object is (Z axis)
-cutout_radius_mm = back_height_mm / 2;    // RADIUS of the cylinder chunk to remove
+// ==========================================
+// CONFIGURATION
+// ==========================================
 
-// --- EXTRA BASE ---
-extra_base_height_mm = 30; // Height of the extra material underneath
+// --- Dimensions (mm) ---
+back_height_mm   = 26.57;   // The tall side of the ramp part
+front_height_mm  = 10.3;    // The short side (toe) of the ramp part
+block_width_mm   = 50.0;    // Depth of the object (Z axis)
+cutout_radius_mm = back_height_mm / 2; // Radius of the cylinder cut
 
-// --- ANGLE CALCULATION ---
+// --- Base Settings ---
+extra_base_height_mm = 30.0;  // Height of the extra material underneath
+base_offset_mm       = 22.75; // The manual offset (from your screenshot)
+
+// ==========================================
+// CALCULATIONS
+// ==========================================
+
+// --- Angle Math ---
+// Target angle based on original 5.75/23 ratio
 target_angle = asin(5.75 / 23);
 
-// --- GEOMETRY MATH ---
+// --- Length Math ---
 rise = back_height_mm - front_height_mm;
-calculated_length = rise / tan(target_angle);
+total_ramp_length = rise / tan(target_angle);
 
-// extra length
+// --- Base Positioning Math ---
+// Calculate where the base starts and how long it needs to be 
+// to align with the front of the ramp.
+base_start_x = cutout_radius_mm - base_offset_mm;
+base_length  = total_ramp_length - base_start_x;
 
-// Fit futher back a bit underneath the cylinder cutout
-extra_calculated_length = calculated_length ;
+// ==========================================
+// RENDER
+// ==========================================
 
-// --- RENDER ---
-// OpenSCAD automatically combines (unions) shapes listed sequentially.
-
-// 1. THE ORIGINAL RAMP & CUTOUT
-// This part sits above Y=0
+// 1. TOP SECTION: RAMP & CUTOUT
+color("Goldenrod") 
 difference() {
-    // The Base Trapezoid Shape
+    // A. The Ramp Shape
     linear_extrude(height = block_width_mm) {
         polygon(points = [
             [0, 0],
-            [calculated_length, 0],
-            [calculated_length, front_height_mm],
+            [total_ramp_length, 0],
+            [total_ramp_length, front_height_mm],
             [0, back_height_mm]
         ]);
     }
 
-    // The Cylinder to Subtract
+    // B. The Cylinder Cutout
     translate([0, back_height_mm - cutout_radius_mm, -1]) {
         cylinder(h = block_width_mm + 2, r = cutout_radius_mm, $fn = 100);
     }
 }
 
-// 2. THE EXTRA BASE MATERIAL
-// This part is shifted down to sit below Y=0
-translate([0 + cutout_radius_mm - 22.75 , -extra_base_height_mm, 0]) {
-    // Creates a block: [length (X), height (Y), depth (Z)]
-    cube([extra_calculated_length + 22.75 - cutout_radius_mm, extra_base_height_mm, block_width_mm]);
+// 2. BOTTOM SECTION: EXTRA BASE
+// Shifts down and adjusts X to fit the calculated offset
+color("FireBrick")
+translate([base_start_x, -extra_base_height_mm, 0]) {
+    cube([base_length, extra_base_height_mm, block_width_mm]);
 }
 
-
-// --- DATA OUTPUT ---
+// ==========================================
+// CONSOLE OUTPUT
+// ==========================================
 echo("------------------------------------------------");
-echo(str("Total Back Height: ", back_height_mm + extra_base_height_mm, " mm"));
-echo(str("Extra Base Height: ", extra_base_height_mm, " mm"));
+echo(str("Total Height: ", back_height_mm + extra_base_height_mm, " mm"));
+echo(str("Base X Shift: ", base_start_x, " mm"));
 echo("------------------------------------------------");
