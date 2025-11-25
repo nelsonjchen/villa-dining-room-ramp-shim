@@ -1,25 +1,22 @@
 # Makefile for ramp_shim
 
-# --- Variables ---
 SCAD_FILE = ramp_shim.scad
-DXF_FILE = ramp_shim.dxf
-PNG_FILE = ramp_shim.png
+STL_FILE  = ramp_shim.stl
+PNG_FILE  = ramp_shim.png
+IMG_SIZE  = 800,600
 
-# --- Targets ---
+all: stl png
 
-all: dxf png
-
-dxf: $(DXF_FILE)
-
+stl: $(STL_FILE)
 png: $(PNG_FILE)
 
-$(DXF_FILE): $(SCAD_FILE)
-	openscad -o $@ -D output_2D=true $<
+$(STL_FILE): $(SCAD_FILE)
+	openscad -o $@ $<
 
 $(PNG_FILE): $(SCAD_FILE)
-	openscad -o $@ -D output_2D=false $<
+	openscad -o $@ $< --imgsize=$(IMG_SIZE)
 
 clean:
-	rm -f $(DXF_FILE) $(PNG_FILE)
+	rm -f $(STL_FILE) $(PNG_FILE)
 
-.PHONY: all dxf png clean
+.PHONY: all stl png clean
