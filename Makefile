@@ -1,22 +1,19 @@
 # Makefile for ramp_shim
 
 SCAD_FILE = ramp_shim.scad
-STL_FILE  = ramp_shim.stl
-PNG_FILE  = ramp_shim.png
+DINING_STL = ramp_shim_dining.stl
+LIVING_STL = ramp_shim_living.stl
 IMG_SIZE  = 800,600
 
-all: stl png
+all: $(DINING_STL) $(LIVING_STL)
 
-stl: $(STL_FILE)
-png: $(PNG_FILE)
+$(DINING_STL): $(SCAD_FILE)
+	openscad -o $@ -D is_dining_room=true $<
 
-$(STL_FILE): $(SCAD_FILE)
-	openscad -o $@ $<
-
-$(PNG_FILE): $(SCAD_FILE)
-	openscad -o $@ $< --imgsize=$(IMG_SIZE)
+$(LIVING_STL): $(SCAD_FILE)
+	openscad -o $@ -D is_dining_room=false $<
 
 clean:
-	rm -f $(STL_FILE) $(PNG_FILE)
+	rm -f $(DINING_STL) $(LIVING_STL) *.png
 
-.PHONY: all stl png clean
+.PHONY: all clean

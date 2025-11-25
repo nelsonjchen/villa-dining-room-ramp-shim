@@ -27,21 +27,9 @@ Open `ramp_shim.scad` in OpenSCAD or a text editor to modify the following param
 
 ## Building
 
-A `Makefile` is provided to automate the generation of STL files and preview images.
+A `Makefile` is provided to automate the generation of STL files for both dining and living room variants.
 
-To generate the STL file for 3D printing:
-
-```bash
-make stl
-```
-
-To generate a PNG preview image:
-
-```bash
-make png
-```
-
-To generate both:
+To generate both `ramp_shim_dining.stl` and `ramp_shim_living.stl`:
 
 ```bash
 make all
