@@ -1,10 +1,13 @@
 // --- DIMENSIONS (mm) ---
-back_height_mm = 26.57;    // The tall side
-front_height_mm = 10.3;     // The short side (toe)
-block_width_mm = 50.0;     // How deep the object is
+back_height_mm = 26.57;    // The tall side of the ramp part
+front_height_mm = 10.3;    // The short side (toe) of the ramp part
+block_width_mm = 50.0;     // How deep the object is (Z axis)
 cutout_radius_mm = back_height_mm / 2;    // RADIUS of the cylinder chunk to remove
 
-// --- ANGLE CALCULATION (Based on original request) ---
+// --- NEW VARIABLE: EXTRA BASE ---
+extra_base_height_mm = 22.75; // Height of the extra material underneath
+
+// --- ANGLE CALCULATION ---
 target_angle = asin(5.75 / 23);
 
 // --- GEOMETRY MATH ---
@@ -12,25 +15,37 @@ rise = back_height_mm - front_height_mm;
 calculated_length = rise / tan(target_angle);
 
 // --- RENDER ---
+// OpenSCAD automatically combines (unions) shapes listed sequentially.
+
+// 1. THE ORIGINAL RAMP & CUTOUT
+// This part sits above Y=0
 difference() {
-    // 1. The Base Shape (The Trapezoidal Prism)
+    // The Base Trapezoid Shape
     linear_extrude(height = block_width_mm) {
         polygon(points = [
-            [0, 0],                         // Bottom Left (Back)
-            [calculated_length, 0],         // Bottom Right (Front)
-            [calculated_length, front_height_mm], // Top Right
-            [0, back_height_mm]             // Top Left (The corner to cut)
+            [0, 0],
+            [calculated_length, 0],
+            [calculated_length, front_height_mm],
+            [0, back_height_mm]
         ]);
     }
 
-    // 2. The Cylinder to Subtract
-    // Position so the cylinder's top (max Y) is at the ramp top (back_height_mm)
+    // The Cylinder to Subtract
     translate([0, back_height_mm - cutout_radius_mm, -1]) {
         cylinder(h = block_width_mm + 2, r = cutout_radius_mm, $fn = 100);
     }
 }
 
+// 2. THE EXTRA BASE MATERIAL
+// This part is shifted down to sit below Y=0
+translate([0, -extra_base_height_mm, 0]) {
+    // Creates a block: [length (X), height (Y), depth (Z)]
+    cube([calculated_length, extra_base_height_mm, block_width_mm]);
+}
+
+
 // --- DATA OUTPUT ---
 echo("------------------------------------------------");
-echo(str("Cutout Radius: ", cutout_radius_mm, " mm"));
+echo(str("Total Back Height: ", back_height_mm + extra_base_height_mm, " mm"));
+echo(str("Extra Base Height: ", extra_base_height_mm, " mm"));
 echo("------------------------------------------------");
