@@ -3,8 +3,10 @@
 // ==========================================
 
 // --- Dimensions (mm) ---
+is_dining_room = true; // true = dining room (10.3mm), false = living room (18.0mm)
+
 back_height_mm   = 26.57;
-front_height_mm  = 10.3;
+front_height_mm  = is_dining_room ? 10.3 : 18.0;
 block_width_mm   = 50.0;
 cutout_radius_mm = back_height_mm / 2;
 
