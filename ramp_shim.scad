@@ -8,12 +8,16 @@ front_height_mm  = 10.3;
 block_width_mm   = 50.0;
 cutout_radius_mm = back_height_mm / 2;
 
+// --- New Feature: Rectangular Overhang ---
+overhang_length_mm = 10.0; // How far it sticks out
+lip_thickness_mm   = 0.5;  // How thick the rectangular tab is
+
 // --- Base Settings ---
-extra_base_height_mm = 30.0;
+extra_base_height_mm = 5.0;
 base_offset_mm       = 22.75;
 
 // --- Wall Settings ---
-wall_thickness   = 1.0;
+wall_thickness   = 0.5;
 
 // ==========================================
 // CALCULATIONS
@@ -28,26 +32,34 @@ base_length  = total_ramp_length - base_start_x;
 // MODULES
 // ==========================================
 
-// We create a reusable module for the 2D shape so we don't have to type it twice.
-// This module defines the Ramp + Base - The Circle Cutout.
 module complete_2d_profile() {
     difference() {
-        // 1. The Positive Shape (Ramp + Base)
+        // 1. The Positive Shapes (Union together)
         union() {
-            // Ramp part
+            // A. Original Ramp part
             polygon(points = [
                 [0, 0],
                 [total_ramp_length, 0],
                 [total_ramp_length, front_height_mm],
                 [0, back_height_mm]
             ]);
-            // Base part
+            
+            // B. Base part
             translate([base_start_x, -extra_base_height_mm])
                 square([base_length, extra_base_height_mm]);
+
+            // C. NEW: Rectangular Lip Extension
+            // We translate to the top-front corner
+            translate([total_ramp_length, front_height_mm])
+                // Rotate to match the slope (negative angle)
+                rotate([0, 0, -target_angle])
+                    // Draw the rectangle hanging "down" from that corner
+                    // [Length, Thickness] - We translate Y down by thickness to align top edge
+                    translate([0, -lip_thickness_mm])
+                        square([overhang_length_mm, lip_thickness_mm]);
         }
 
         // 2. The Negative Shape (The Circle Cutout)
-        // We do the cut in 2D right here!
         translate([0, back_height_mm - cutout_radius_mm]) {
             circle(r = cutout_radius_mm, $fn = 100);
         }
@@ -59,19 +71,24 @@ module complete_2d_profile() {
 // ==========================================
 
 linear_extrude(height = block_width_mm) {
-    difference() {
-        // A. The Outer Profile (with the bite taken out)
-        complete_2d_profile();
-
-        // B. The Inner Void
-        // We shrink the profile by the wall thickness
-        offset(r = -wall_thickness) {
+    intersection() {
+        // 1. The Hollow 2D Shape
+        difference() {
             complete_2d_profile();
+            offset(r = -wall_thickness) {
+                complete_2d_profile();
+            }
         }
+
+        // 2. The Floor Cut
+        // Slices off the bottom based on your base height
+        floor_level_y = -extra_base_height_mm + wall_thickness;
+        translate([-500, floor_level_y])
+            square([2000, 2000]); 
     }
 }
 
 // ==========================================
 // DATA OUTPUT
 // ==========================================
-echo(str("Wall Thickness: ", wall_thickness, " mm"));
+echo(str("Lip Extension: ", overhang_length_mm, "mm long x ", lip_thickness_mm, "mm thick"));
