@@ -9,7 +9,7 @@ block_width_mm   = 50.0;
 cutout_radius_mm = back_height_mm / 2;
 
 // --- New Feature: Rectangular Overhang ---
-overhang_length_mm = 10.0; // How far it sticks out
+overhang_length_mm = 20.0; // How far it sticks out
 lip_thickness_mm   = 1.0;  // How thick the rectangular tab is
 
 // --- Base Settings ---
