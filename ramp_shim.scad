@@ -12,14 +12,14 @@ cutout_radius_mm = back_height_mm / 2;
 
 // --- New Feature: Rectangular Overhang ---
 overhang_length_mm = 20.0; // How far it sticks out
-lip_thickness_mm   = 1.0;  // How thick the rectangular tab is
+lip_thickness_mm   = 0.5;  // How thick the rectangular tab is
 
 // --- Base Settings ---
 extra_base_height_mm = 5.0;
 base_offset_mm       = 22.75;
 
 // --- Wall Settings ---
-wall_thickness   = 1.0;
+wall_thickness   = 0.5;
 
 // ==========================================
 // CALCULATIONS
